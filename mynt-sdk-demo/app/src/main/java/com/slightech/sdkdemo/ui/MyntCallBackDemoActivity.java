@@ -1,4 +1,5 @@
 package com.slightech.sdkdemo.ui;
+
 import android.app.Activity;
 import android.bluetooth.BluetoothGatt;
 import android.os.Bundle;
@@ -21,15 +22,22 @@ import com.slightech.sdkdemo.util.StringUtil;
  * Created by Willard
  *
  * use MyntManager for pair device and process mynt click
- *
  */
 public class MyntCallBackDemoActivity extends Activity implements View.OnClickListener,
         AbsMyntManager.PairCallback, AbsMyntManager.EventCallback {
-    private MyMyntManger mMyntManager;
-    private String mSn;
-    private String mAddress;
+
     public static final String ARG_SN = "device_sn";
     public static final String ARG_ADDRESS = "device_address";
+
+    private static final int STATE_UNCONNECT = 1;
+    private static final int STATE_CONNECTING = 2;
+    private static final int STATE_CONNECTED = 3;
+
+    private MyMyntManger mMyntManager;
+
+    private String mSn;
+    private String mAddress;
+
     private TextView mTextInfo;
     private TextView mTextRss;
     private TextView mTextBattery;
@@ -38,14 +46,16 @@ public class MyntCallBackDemoActivity extends Activity implements View.OnClickLi
     private Button mBtnTimeRing;
     private TextView mtextState;
     private ListView mListLog;
+
     private InfoAdapter infoAdapter;
+
     private String mPwd;
-    private static final int STATE_UNCONNECT = 1;
-    private static final int STATE_CONNECTING = 2;
-    private static final int STATE_CONNECTED = 3;
+
     private int mState = STATE_CONNECTED;
+
     private boolean mRing;
     private boolean mTimeRing;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,7 +84,6 @@ public class MyntCallBackDemoActivity extends Activity implements View.OnClickLi
         mMyntManager = MyMyntManger.getInstance();
 
         setMyntCallBack();
-
     }
 
     private void setMyntCallBack() {
@@ -135,8 +144,8 @@ public class MyntCallBackDemoActivity extends Activity implements View.OnClickLi
 
     private void setConnectText(int state) {
         mState = state;
-        String btnText = "unknow";
-        String stateText = "unkow";
+        String btnText = "unknown";
+        String stateText = "unknown";
         switch (mState) {
             case STATE_CONNECTED:
                 btnText = getResString(R.string.disconnect);
@@ -175,12 +184,13 @@ public class MyntCallBackDemoActivity extends Activity implements View.OnClickLi
 
     @Override
     public void pairServicesDiscovered(Device device, boolean success) {
-        infoAdapter.p(String.format("pairServicesDiscovered success : %s ", success ?  getResString(R.string.success) : getResString(R.string.fail)));
+        infoAdapter.p(String.format("pairServicesDiscovered success: %s",
+                success ? getResString(R.string.success) : getResString(R.string.fail)));
     }
 
     @Override
     public void pairBindStart(Device device) {
-        infoAdapter.p(String.format("pairBindStart"));
+        infoAdapter.p("pairBindStart");
 
         if (mPwd == null) {
             //request mynt password
@@ -190,12 +200,13 @@ public class MyntCallBackDemoActivity extends Activity implements View.OnClickLi
             mMyntManager.sendPassword(mSn, StringUtil.hexStringToByteArray(mPwd));
         }
 
-        toask(getResString(R.string.pairTip));
+        toast(getResString(R.string.pairTip));
     }
 
     @Override
     public void pairBindOver(Device device, boolean success) {
-        infoAdapter.p(String.format("pairBindOver success : %s ", success ? getResString(R.string.success) : getResString(R.string.fail)));
+        infoAdapter.p(String.format("pairBindOver success: %s",
+                success ? getResString(R.string.success) : getResString(R.string.fail)));
 
         if (success) {
             setConnectText(STATE_CONNECTED);
@@ -213,7 +224,7 @@ public class MyntCallBackDemoActivity extends Activity implements View.OnClickLi
 
     @Override
     public void pairDisconnect(Device device) {
-        infoAdapter.p(String.format("pairDisconnect "));
+        infoAdapter.p(String.format("pairDisconnect"));
         mPwd = null;
         setConnectText(STATE_UNCONNECT);
     }
@@ -229,24 +240,24 @@ public class MyntCallBackDemoActivity extends Activity implements View.OnClickLi
         switch (myntEvent) {
             case Click:
                 infoAdapter.p("Click");
-                toask(getResString(R.string.click));
+                toast(getResString(R.string.click));
                 break;
             case DoubleClick:
                 infoAdapter.p("DoubleClick");
-                toask(getResString(R.string.doubleClick));
+                toast(getResString(R.string.doubleClick));
                 break;
             case TripleClick:
                 infoAdapter.p("TripleClick");
-                toask(getResString(R.string.tripleClick));
+                toast(getResString(R.string.tripleClick));
                 break;
             case LongClick:
                 infoAdapter.p("LongClick");
-                toask(getResString(R.string.longClick));
+                toast(getResString(R.string.longClick));
                 break;
         }
     }
 
-    private void toask(String msg) {
+    private void toast(String msg) {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
 
@@ -259,25 +270,24 @@ public class MyntCallBackDemoActivity extends Activity implements View.OnClickLi
 
     @Override
     public void eventInfoChanged(Device device, DeviceInfo deviceInfo) {
-
     }
 
     @Override
     public void eventRssiChanged(Device device, int rssi) {
-        mTextRss.setText("RSS:" +rssi);
+        mTextRss.setText("RSSI: " +rssi);
     }
 
     @Override
     public void eventBatteryChanged(Device device, int battery) {
-        mTextBattery.setText("Battery:"+ battery);
+        mTextBattery.setText("Battery: " + battery);
     }
 
     @Override
     public void eventAlarmChanged(Device device, boolean on) {
-
     }
 
     private String getResString(int resId) {
         return this.getResources().getString(resId);
     }
+
 }

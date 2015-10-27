@@ -7,11 +7,13 @@ import com.slightech.sdkdemo.MyApplication;
  * Created by Willard  on 2015/9/22.
  */
 public class MyMyntManger extends MyntManager {
+
     public static MyMyntManger getInstance() {
         return MyBleMangerHolder.instance;
     }
+
     private MyMyntManger() {
-       super(MyApplication.getInstance());
+        super(MyApplication.getInstance());
         initParameters();
     }
 
@@ -24,8 +26,8 @@ public class MyMyntManger extends MyntManager {
         params.foundTimeout = 15000;
         params.foundTimeoutInterval = params.foundTimeout / 2;
         setParameters(params);
-
     }
+
     private static class MyBleMangerHolder {
         static final MyMyntManger instance = new MyMyntManger();
     }

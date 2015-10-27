@@ -4,7 +4,9 @@ package com.slightech.sdkdemo.util;
  * Created by Willard  on 2015/9/23.
  */
 public class StringUtil {
+
     public static final String EMPTY = "";
+
     //-----------------------------------------------------------------------
 
     public static String byteArrayToHexString(byte[] bytes) {

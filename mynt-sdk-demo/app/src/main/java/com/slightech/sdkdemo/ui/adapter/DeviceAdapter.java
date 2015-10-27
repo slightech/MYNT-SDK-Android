@@ -16,8 +16,10 @@ import java.util.List;
  * Created by Willard  on 2015/9/22.
  */
 public class DeviceAdapter extends BaseAdapter {
+
     private List<Device> devices;
     private Context mContext;
+
     public DeviceAdapter(Context context) {
         devices = new ArrayList<>();
         mContext = context;
@@ -35,7 +37,6 @@ public class DeviceAdapter extends BaseAdapter {
                 break;
             }
         }
-
         if (!isExists) {
             devices.add(addDevice);
             notifyDataSetChanged();
@@ -86,9 +87,9 @@ public class DeviceAdapter extends BaseAdapter {
         return convertView;
     }
 
-
     static class ViewHolder {
         TextView tvAddress;
         TextView tvSn;
     }
+
 }

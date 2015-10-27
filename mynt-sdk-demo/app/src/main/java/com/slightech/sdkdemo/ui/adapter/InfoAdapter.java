@@ -7,7 +7,6 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-
 import com.slightech.sdkdemo.R;
 
 import java.text.SimpleDateFormat;
@@ -39,7 +38,6 @@ public class InfoAdapter extends BaseAdapter {
             notifyDataSetChanged();
         }
     }
-
 
     @Override
     public int getCount() {

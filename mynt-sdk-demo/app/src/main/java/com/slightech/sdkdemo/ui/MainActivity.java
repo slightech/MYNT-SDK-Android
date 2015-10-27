@@ -8,19 +8,26 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
+
 import com.slightech.ble.mynt.AbsMyntManager;
 import com.slightech.ble.mynt.model.Device;
 import com.slightech.sdkdemo.R;
 import com.slightech.sdkdemo.manager.MyMyntManger;
 import com.slightech.sdkdemo.ui.adapter.DeviceAdapter;
+
 public class MainActivity extends Activity implements View.OnClickListener,
         AbsMyntManager.FoundCallback, AdapterView.OnItemClickListener {
+
     private static final String TAG = MainActivity.class.getName();
+
     private Button mBtnScan;
     private ListView mListDevices;
+
     private boolean mScan = true;
+
     private MyMyntManger mMyntManager;
     private DeviceAdapter mDeviceAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,9 +42,7 @@ public class MainActivity extends Activity implements View.OnClickListener,
         mListDevices.setOnItemClickListener(this);
         mBtnScan.setOnClickListener(this);
         setBtnText();
-
     }
-
 
     @Override
     public void onClick(View v) {
@@ -107,6 +112,7 @@ public class MainActivity extends Activity implements View.OnClickListener,
         intent.putExtra(MyntCallBackDemoActivity.ARG_ADDRESS, device.address);
         startActivity(intent);
     }
+
     /**
      * to demo for MyntListener Callback demo
      * @param device
