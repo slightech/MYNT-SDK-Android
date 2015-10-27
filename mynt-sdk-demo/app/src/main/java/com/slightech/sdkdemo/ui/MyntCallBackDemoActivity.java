@@ -1,0 +1,283 @@
+package com.slightech.sdkdemo.ui;
+import android.app.Activity;
+import android.bluetooth.BluetoothGatt;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.slightech.ble.mynt.AbsMyntManager;
+import com.slightech.ble.mynt.MyntEvent;
+import com.slightech.ble.mynt.model.Device;
+import com.slightech.ble.mynt.model.DeviceInfo;
+import com.slightech.sdkdemo.R;
+import com.slightech.sdkdemo.manager.MyMyntManger;
+import com.slightech.sdkdemo.ui.adapter.InfoAdapter;
+import com.slightech.sdkdemo.util.StringUtil;
+
+/**
+ * Created by Willard
+ *
+ * use MyntManager for pair device and process mynt click
+ *
+ */
+public class MyntCallBackDemoActivity extends Activity implements View.OnClickListener,
+        AbsMyntManager.PairCallback, AbsMyntManager.EventCallback {
+    private MyMyntManger mMyntManager;
+    private String mSn;
+    private String mAddress;
+    public static final String ARG_SN = "device_sn";
+    public static final String ARG_ADDRESS = "device_address";
+    private TextView mTextInfo;
+    private TextView mTextRss;
+    private TextView mTextBattery;
+    private Button mBtnConnect;
+    private Button mBtnRing;
+    private Button mBtnTimeRing;
+    private TextView mtextState;
+    private ListView mListLog;
+    private InfoAdapter infoAdapter;
+    private String mPwd;
+    private static final int STATE_UNCONNECT = 1;
+    private static final int STATE_CONNECTING = 2;
+    private static final int STATE_CONNECTED = 3;
+    private int mState = STATE_CONNECTED;
+    private boolean mRing;
+    private boolean mTimeRing;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_device);
+
+        mBtnConnect = (Button) findViewById(R.id.btn_connect);
+        mBtnRing = (Button) findViewById(R.id.btn_ring);
+        mBtnTimeRing = (Button) findViewById(R.id.btn_time_ring);
+        mTextInfo = (TextView) findViewById(R.id.textInfo);
+        mTextRss = (TextView) findViewById(R.id.textRss);
+        mtextState = (TextView) findViewById(R.id.textState);
+        mTextBattery = (TextView) findViewById(R.id.textBattery);
+        mListLog = (ListView) findViewById(R.id.list_log);
+
+        infoAdapter = new InfoAdapter(this);
+        mListLog.setAdapter(infoAdapter);
+        mBtnConnect.setOnClickListener(this);
+        mBtnRing.setOnClickListener(this);
+        mBtnTimeRing.setOnClickListener(this);
+        initTextInfo();
+        setConnectText(STATE_UNCONNECT);
+        setRingText(false);
+        setTimeRingText(false);
+
+
+        mMyntManager = MyMyntManger.getInstance();
+
+        setMyntCallBack();
+
+    }
+
+    private void setMyntCallBack() {
+        //set PairCallback
+        mMyntManager.setPairCallback(this);
+        //set EventCallBack
+        mMyntManager.setEventCallback(this);
+    }
+
+    private void initTextInfo() {
+        mSn = getIntent().getStringExtra(ARG_SN);
+        mAddress = getIntent().getStringExtra(ARG_ADDRESS);
+        String info = "sn: %s \naddress: %s";
+        mTextInfo.setText(String.format(info, mSn, mAddress));
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.btn_connect:
+                if (mState == STATE_CONNECTING) {
+                    return ;
+                }
+                if (mState == STATE_UNCONNECT) {
+                    mMyntManager.connect(mSn);
+                } else {
+                    mMyntManager.disconnect(mSn);
+                }
+                break;
+            case R.id.btn_ring:
+                if (!mRing) {
+                    mMyntManager.alarmLong(mSn, true);
+                } else {
+                    mMyntManager.alarmLong(mSn, false);
+                }
+                setRingText(!mRing);
+                break;
+            case R.id.btn_time_ring:
+                if (!mTimeRing) {
+                    mMyntManager.alarm(mSn, true);
+                } else {
+                    mMyntManager.alarm(mSn, false);
+                }
+                setTimeRingText(!mTimeRing);
+                break;
+        }
+    }
+
+    private void setRingText(boolean ring) {
+          this.mRing = ring;
+          this.mBtnRing.setText(mRing ? getResString(R.string.stop_ring) : getResString(R.string.start_ring));
+    }
+
+    private void setTimeRingText(boolean ring) {
+        this.mTimeRing = ring;
+        this.mBtnTimeRing.setText(mTimeRing ? getResString(R.string.stop_time_ring) : getResString(R.string.start_time_ring));
+    }
+
+    private void setConnectText(int state) {
+        mState = state;
+        String btnText = "unknow";
+        String stateText = "unkow";
+        switch (mState) {
+            case STATE_CONNECTED:
+                btnText = getResString(R.string.disconnect);
+                stateText = getResString(R.string.state_connected);
+                mBtnRing.setEnabled(true);
+                mBtnTimeRing.setEnabled(true);
+                break;
+            case STATE_CONNECTING:
+                btnText = getResString(R.string.state_connecting);
+                stateText = getResString(R.string.state_connecting);
+                mBtnRing.setEnabled(false);
+                mBtnTimeRing.setEnabled(false);
+                break;
+            case STATE_UNCONNECT:
+                btnText = getResString(R.string.connect);
+                stateText = getResString(R.string.state_unconnected);
+                mBtnRing.setEnabled(false);
+                mBtnTimeRing.setEnabled(false);
+                break;
+        }
+        mBtnConnect.setText(btnText);
+        mtextState.setText(getResString(R.string.state) + stateText);
+    }
+
+    @Override
+    public void pairConnectStart(Device device) {
+        infoAdapter.p("pairConnectStart");
+        setConnectText(STATE_CONNECTING);
+    }
+
+    @Override
+    public void pairConnectOver(Device device, int errorCode, int status) {
+        boolean success = (status == BluetoothGatt.GATT_SUCCESS);
+        infoAdapter.p(String.format("pairConnectOver errorCode: %s, status: %s", errorCode, status));
+    }
+
+    @Override
+    public void pairServicesDiscovered(Device device, boolean success) {
+        infoAdapter.p(String.format("pairServicesDiscovered success : %s ", success ?  getResString(R.string.success) : getResString(R.string.fail)));
+    }
+
+    @Override
+    public void pairBindStart(Device device) {
+        infoAdapter.p(String.format("pairBindStart"));
+
+        if (mPwd == null) {
+            //request mynt password
+            mMyntManager.requestPassword(mSn);
+        } else {
+            //Send the password, the password can be automatically sent to save the password for the matching link
+            mMyntManager.sendPassword(mSn, StringUtil.hexStringToByteArray(mPwd));
+        }
+
+        toask(getResString(R.string.pairTip));
+    }
+
+    @Override
+    public void pairBindOver(Device device, boolean success) {
+        infoAdapter.p(String.format("pairBindOver success : %s ", success ? getResString(R.string.success) : getResString(R.string.fail)));
+
+        if (success) {
+            setConnectText(STATE_CONNECTED);
+            //Read the signal value, read only once. If you need time to read, you can write a custom device to call this method to read
+            mMyntManager.readRssi(device);
+            //read battery
+            mMyntManager.requestBattery(device.sn);
+            //set alarmNum  when disconnect alram or call alarm method will ring
+            mMyntManager.alarmNum(mSn, 1);
+        } else {
+            setConnectText(STATE_UNCONNECT);
+        }
+
+    }
+
+    @Override
+    public void pairDisconnect(Device device) {
+        infoAdapter.p(String.format("pairDisconnect "));
+        mPwd = null;
+        setConnectText(STATE_UNCONNECT);
+    }
+
+    @Override
+    public void pairDisconnectError(Device device, int errorCode, int status) {
+        infoAdapter.p(String.format("pairDisconnectError errorCode: %s, status: %s", errorCode, status));
+        setConnectText(STATE_UNCONNECT);
+    }
+
+    @Override
+    public void eventFired(Device device, MyntEvent myntEvent) {
+        switch (myntEvent) {
+            case Click:
+                infoAdapter.p("Click");
+                toask(getResString(R.string.click));
+                break;
+            case DoubleClick:
+                infoAdapter.p("DoubleClick");
+                toask(getResString(R.string.doubleClick));
+                break;
+            case TripleClick:
+                infoAdapter.p("TripleClick");
+                toask(getResString(R.string.tripleClick));
+                break;
+            case LongClick:
+                infoAdapter.p("LongClick");
+                toask(getResString(R.string.longClick));
+                break;
+        }
+    }
+
+    private void toask(String msg) {
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void eventPasswordReceived(Device device, byte[] password) {
+        //save password
+        this.mPwd = StringUtil.byteArrayToHexString(password);
+        infoAdapter.p(String.format("receive pwd %s", mPwd));
+    }
+
+    @Override
+    public void eventInfoChanged(Device device, DeviceInfo deviceInfo) {
+
+    }
+
+    @Override
+    public void eventRssiChanged(Device device, int rssi) {
+        mTextRss.setText("RSS:" +rssi);
+    }
+
+    @Override
+    public void eventBatteryChanged(Device device, int battery) {
+        mTextBattery.setText("Battery:"+ battery);
+    }
+
+    @Override
+    public void eventAlarmChanged(Device device, boolean on) {
+
+    }
+
+    private String getResString(int resId) {
+        return this.getResources().getString(resId);
+    }
+}
