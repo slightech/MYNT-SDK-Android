@@ -1,6 +1,7 @@
 package com.slightech.sdkdemo.ui;
 
 import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -9,21 +10,21 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 
-import com.slightech.ble.mynt.AbsMyntManager;
+import com.slightech.ble.mynt.callback.FoundCallback;
 import com.slightech.ble.mynt.model.Device;
 import com.slightech.sdkdemo.R;
 import com.slightech.sdkdemo.manager.MyMyntManger;
 import com.slightech.sdkdemo.ui.adapter.DeviceAdapter;
 
 public class MainActivity extends Activity implements View.OnClickListener,
-        AbsMyntManager.FoundCallback, AdapterView.OnItemClickListener {
+        FoundCallback, AdapterView.OnItemClickListener {
 
     private static final String TAG = MainActivity.class.getName();
 
     private Button mBtnScan;
     private ListView mListDevices;
 
-    private boolean mScan = true;
+    private boolean mScanning = false;
 
     private MyMyntManger mMyntManager;
     private DeviceAdapter mDeviceAdapter;
@@ -35,28 +36,32 @@ public class MainActivity extends Activity implements View.OnClickListener,
         mMyntManager.setFoundCallback(this);
 
         setContentView(R.layout.activity_main);
+
         mBtnScan = (Button) findViewById(R.id.btn_scan);
+        mBtnScan.setOnClickListener(this);
+
         mListDevices = (ListView) findViewById(R.id.list);
         mDeviceAdapter = new DeviceAdapter(this);
         mListDevices.setAdapter(mDeviceAdapter);
         mListDevices.setOnItemClickListener(this);
-        mBtnScan.setOnClickListener(this);
+
         setBtnText();
+
+        // ensure enable bluetooth
+        BluetoothAdapter.getDefaultAdapter().enable();
     }
 
     @Override
     public void onClick(View v) {
-       switch (v.getId()) {
-           case R.id.btn_scan:
-               if (mScan) {
-                   stopScan();
-               } else {
-                   startScan();
-               }
-               mScan = !mScan;
-               setBtnText();
-               break;
-       }
+        switch (v.getId()) {
+            case R.id.btn_scan:
+                if (mScanning) {
+                    stopScan();
+                } else {
+                    startScan();
+                }
+                break;
+        }
     }
 
     /**
@@ -64,6 +69,8 @@ public class MainActivity extends Activity implements View.OnClickListener,
      */
     private void startScan() {
         mMyntManager.startSearch();
+        mScanning = true;
+        setBtnText();
     }
 
     /**
@@ -71,11 +78,12 @@ public class MainActivity extends Activity implements View.OnClickListener,
      */
     private void stopScan() {
         mMyntManager.stopSearch();
+        mScanning = false;
+        setBtnText();
     }
 
     private void setBtnText() {
-        String text = mScan ? this.getString(R.string.start_scan) : this.getString(R.string.stop_scan);
-        mBtnScan.setText(text);
+        mBtnScan.setText(mScanning ? R.string.stop_scan : R.string.start_scan);
     }
 
     @Override
@@ -92,35 +100,24 @@ public class MainActivity extends Activity implements View.OnClickListener,
 
     @Override
     public void foundDeviceRemoved(Device device) {
-      mDeviceAdapter.removeDevice(device);
+        mDeviceAdapter.removeDevice(device);
     }
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-         Device device = (Device) parent.getItemAtPosition(position);
-         //toMyntCallBackDemoActivity(device);
-        toMyntListenerCallBackDemoActivity(device);
+        Device device = (Device) parent.getItemAtPosition(position);
+        toMyntCallBackDemoActivity(device);
     }
 
     /**
      * to demo for MyntManger CallBack demo
+     *
      * @param device
      */
     public void toMyntCallBackDemoActivity(Device device) {
         Intent intent = new Intent(this, MyntCallBackDemoActivity.class);
         intent.putExtra(MyntCallBackDemoActivity.ARG_SN, device.sn);
         intent.putExtra(MyntCallBackDemoActivity.ARG_ADDRESS, device.address);
-        startActivity(intent);
-    }
-
-    /**
-     * to demo for MyntListener Callback demo
-     * @param device
-     */
-    public void toMyntListenerCallBackDemoActivity(Device device) {
-        Intent intent = new Intent(this, MyntListenerCallBackDemoActivity.class);
-        intent.putExtra(MyntListenerCallBackDemoActivity.ARG_SN, device.sn);
-        intent.putExtra(MyntListenerCallBackDemoActivity.ARG_ADDRESS, device.address);
         startActivity(intent);
     }
 

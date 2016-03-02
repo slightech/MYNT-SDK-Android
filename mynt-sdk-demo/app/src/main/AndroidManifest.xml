@@ -22,7 +22,6 @@
         </activity>
 
         <activity android:name=".ui.MyntCallBackDemoActivity" />
-        <activity android:name=".ui.MyntListenerCallBackDemoActivity" />
 
     </application>
 

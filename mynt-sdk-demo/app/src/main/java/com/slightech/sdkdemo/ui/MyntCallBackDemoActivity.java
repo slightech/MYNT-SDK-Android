@@ -9,22 +9,24 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.slightech.ble.mynt.AbsMyntManager;
+import com.slightech.ble.mynt.MyntClickMode;
 import com.slightech.ble.mynt.MyntEvent;
+import com.slightech.ble.mynt.callback.EventCallback;
+import com.slightech.ble.mynt.callback.HIDCallback;
+import com.slightech.ble.mynt.callback.PairCallback;
 import com.slightech.ble.mynt.model.Device;
 import com.slightech.ble.mynt.model.DeviceInfo;
 import com.slightech.sdkdemo.R;
 import com.slightech.sdkdemo.manager.MyMyntManger;
 import com.slightech.sdkdemo.ui.adapter.InfoAdapter;
-import com.slightech.sdkdemo.util.StringUtil;
 
 /**
  * Created by Willard
- *
+ * <p>
  * use MyntManager for pair device and process mynt click
  */
 public class MyntCallBackDemoActivity extends Activity implements View.OnClickListener,
-        AbsMyntManager.PairCallback, AbsMyntManager.EventCallback {
+        PairCallback, EventCallback, HIDCallback {
 
     public static final String ARG_SN = "device_sn";
     public static final String ARG_ADDRESS = "device_address";
@@ -44,12 +46,10 @@ public class MyntCallBackDemoActivity extends Activity implements View.OnClickLi
     private Button mBtnConnect;
     private Button mBtnRing;
     private Button mBtnTimeRing;
-    private TextView mtextState;
+    private TextView mTextState;
     private ListView mListLog;
 
     private InfoAdapter infoAdapter;
-
-    private String mPwd;
 
     private int mState = STATE_CONNECTED;
 
@@ -66,7 +66,7 @@ public class MyntCallBackDemoActivity extends Activity implements View.OnClickLi
         mBtnTimeRing = (Button) findViewById(R.id.btn_time_ring);
         mTextInfo = (TextView) findViewById(R.id.textInfo);
         mTextRss = (TextView) findViewById(R.id.textRss);
-        mtextState = (TextView) findViewById(R.id.textState);
+        mTextState = (TextView) findViewById(R.id.textState);
         mTextBattery = (TextView) findViewById(R.id.textBattery);
         mListLog = (ListView) findViewById(R.id.list_log);
 
@@ -80,24 +80,23 @@ public class MyntCallBackDemoActivity extends Activity implements View.OnClickLi
         setRingText(false);
         setTimeRingText(false);
 
-
-        mMyntManager = MyMyntManger.getInstance();
-
         setMyntCallBack();
     }
 
     private void setMyntCallBack() {
-        //set PairCallback
+        mMyntManager = MyMyntManger.getInstance();
+        // 配对过程回调
         mMyntManager.setPairCallback(this);
-        //set EventCallBack
+        // 事件监听回调
         mMyntManager.setEventCallback(this);
+        // HID回调，刚连接会读取当前HID配置
+        mMyntManager.setHIDCallback(this);
     }
 
     private void initTextInfo() {
         mSn = getIntent().getStringExtra(ARG_SN);
         mAddress = getIntent().getStringExtra(ARG_ADDRESS);
-        String info = "sn: %s \naddress: %s";
-        mTextInfo.setText(String.format(info, mSn, mAddress));
+        mTextInfo.setText(String.format("sn: %s \naddress: %s", mSn, mAddress));
     }
 
     @Override
@@ -105,7 +104,7 @@ public class MyntCallBackDemoActivity extends Activity implements View.OnClickLi
         switch (v.getId()) {
             case R.id.btn_connect:
                 if (mState == STATE_CONNECTING) {
-                    return ;
+                    return;
                 }
                 if (mState == STATE_UNCONNECT) {
                     mMyntManager.connect(mSn);
@@ -133,8 +132,8 @@ public class MyntCallBackDemoActivity extends Activity implements View.OnClickLi
     }
 
     private void setRingText(boolean ring) {
-          this.mRing = ring;
-          this.mBtnRing.setText(mRing ? getResString(R.string.stop_ring) : getResString(R.string.start_ring));
+        this.mRing = ring;
+        this.mBtnRing.setText(mRing ? getResString(R.string.stop_ring) : getResString(R.string.start_ring));
     }
 
     private void setTimeRingText(boolean ring) {
@@ -167,7 +166,7 @@ public class MyntCallBackDemoActivity extends Activity implements View.OnClickLi
                 break;
         }
         mBtnConnect.setText(btnText);
-        mtextState.setText(getResString(R.string.state) + stateText);
+        mTextState.setText(getResString(R.string.state) + stateText);
     }
 
     @Override
@@ -191,41 +190,37 @@ public class MyntCallBackDemoActivity extends Activity implements View.OnClickLi
     @Override
     public void pairBindStart(Device device) {
         infoAdapter.p("pairBindStart");
-
-        if (mPwd == null) {
-            //request mynt password
-            mMyntManager.requestPassword(mSn);
-        } else {
-            //Send the password, the password can be automatically sent to save the password for the matching link
-            mMyntManager.sendPassword(mSn, StringUtil.hexStringToByteArray(mPwd));
-        }
-
-        toast(getResString(R.string.pairTip));
     }
 
     @Override
     public void pairBindOver(Device device, boolean success) {
-        infoAdapter.p(String.format("pairBindOver success: %s",
-                success ? getResString(R.string.success) : getResString(R.string.fail)));
-
-        if (success) {
-            setConnectText(STATE_CONNECTED);
-            //Read the signal value, read only once. If you need time to read, you can write a custom device to call this method to read
-            mMyntManager.readRssi(device);
-            //read battery
-            mMyntManager.requestBattery(device.sn);
-            //set alarmNum  when disconnect alram or call alarm method will ring
-            mMyntManager.alarmNum(mSn, 1);
-        } else {
-            setConnectText(STATE_UNCONNECT);
-        }
-
+        // do noting
     }
 
     @Override
-    public void pairDisconnect(Device device) {
+    public void hidBindOver(Device device) {
+        infoAdapter.p(String.format("hidBindOver success"));
+
+        setConnectText(STATE_CONNECTED);
+        //Read the signal value, read only once. If you need time to read, you can write a custom device to call this method to read
+        mMyntManager.requestRssi(device);
+        //read battery
+        mMyntManager.requestBattery(device.sn);
+        //set alarmNum  when disconnect alram or call alarm method will ring
+        mMyntManager.alarmNum(mSn, 1);
+    }
+
+    @Override
+    public void eventFired(Device device, MyntClickMode myntClickMode) {
+    }
+
+    @Override
+    public void pairServicesDiscoveredTimeout(Device device) {
+    }
+
+    @Override
+    public void pairDisconnect(Device device, boolean fromUser) {
         infoAdapter.p(String.format("pairDisconnect"));
-        mPwd = null;
         setConnectText(STATE_UNCONNECT);
     }
 
@@ -250,22 +245,15 @@ public class MyntCallBackDemoActivity extends Activity implements View.OnClickLi
                 infoAdapter.p("TripleClick");
                 toast(getResString(R.string.tripleClick));
                 break;
-            case LongClick:
+            case LongPress:
                 infoAdapter.p("LongClick");
                 toast(getResString(R.string.longClick));
                 break;
         }
     }
 
-    private void toast(String msg) {
-        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
-    }
-
     @Override
     public void eventPasswordReceived(Device device, byte[] password) {
-        //save password
-        this.mPwd = StringUtil.byteArrayToHexString(password);
-        infoAdapter.p(String.format("receive pwd %s", mPwd));
     }
 
     @Override
@@ -274,7 +262,7 @@ public class MyntCallBackDemoActivity extends Activity implements View.OnClickLi
 
     @Override
     public void eventRssiChanged(Device device, int rssi) {
-        mTextRss.setText("RSSI: " +rssi);
+        mTextRss.setText("RSSI: " + rssi);
     }
 
     @Override
@@ -284,6 +272,19 @@ public class MyntCallBackDemoActivity extends Activity implements View.OnClickLi
 
     @Override
     public void eventAlarmChanged(Device device, boolean on) {
+    }
+
+    @Override
+    public void onHIDClickChanged(Device device) {
+        infoAdapter.p("HID click: " + device.click.getName()
+                + "\ndoubleClick: " + device.doubleClick.getName()
+                + "\ntripleClick: " + device.tripleClick.getName()
+                + "\nlongClick: " + device.longClick.getName()
+                + "\nclickHold: " + device.clickHold.getName());
+    }
+
+    private void toast(String msg) {
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
 
     private String getResString(int resId) {

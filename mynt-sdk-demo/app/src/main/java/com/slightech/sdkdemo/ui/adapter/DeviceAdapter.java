@@ -44,7 +44,7 @@ public class DeviceAdapter extends BaseAdapter {
     }
 
     public void removeDevice(Device rmDevice) {
-        for (int index =0 ; index < devices.size(); index ++) {
+        for (int index = 0; index < devices.size(); index++) {
             Device device = devices.get(index);
             if (device.sn.equals(rmDevice.sn)) {
                 devices.remove(index);
