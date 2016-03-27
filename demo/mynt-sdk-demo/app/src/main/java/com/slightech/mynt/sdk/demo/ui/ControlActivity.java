@@ -50,13 +50,14 @@ public class ControlActivity extends BaseActivity implements PairCallback, Event
     private ViewAdapter mViewAdapter;
 
     private MyntManager mMyntManager;
-    private Device mDevice;
+    private String mDeviceSn;
 
     public enum State {
         Disconnected, Connecting, Connected,
     }
 
     private State mState = State.Disconnected;
+    private boolean mAlarmOn = false;
 
     private final SimpleDateFormat mDateFormat = new SimpleDateFormat("HH:mm:ss.SSS");
 
@@ -92,36 +93,58 @@ public class ControlActivity extends BaseActivity implements PairCallback, Event
         mMyntManager.setPairCallback(this);
         mMyntManager.setEventCallback(this);
 
-        mDevice = device;
+        mDeviceSn = device.sn;
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.control, menu);
         menu.findItem(R.id.connect).setVisible(mState == State.Disconnected);
-        menu.findItem(R.id.disconnect).setVisible(mState == State.Connected);
+        boolean connected = (mState == State.Connected);
+        menu.findItem(R.id.disconnect).setVisible(connected);
+        menu.findItem(R.id.toggle_alarm).setVisible(connected);
+        menu.findItem(R.id.request_rssi).setVisible(connected);
+        menu.findItem(R.id.request_battery).setVisible(connected);
+        menu.findItem(R.id.request_info).setVisible(connected);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.connect: connect(); break;
-            case R.id.disconnect: disconnect(); break;
+            case R.id.connect:
+                connect();
+                break;
+            case R.id.disconnect:
+                disconnect();
+                break;
+            case R.id.toggle_alarm:
+                mAlarmOn = !mAlarmOn;
+                mMyntManager.alarmLong(mDeviceSn, mAlarmOn);
+                break;
+            case R.id.request_rssi:
+                mMyntManager.requestRssi(mDeviceSn);
+                break;
+            case R.id.request_battery:
+                mMyntManager.requestBattery(mDeviceSn);
+                break;
+            case R.id.request_info:
+                mMyntManager.requestInfo(mDeviceSn);
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
 
     private void connect() {
-        pStrong("connect " + mDevice.sn);
+        pStrong("connect " + mDeviceSn);
         // should not use the input device directly whose state will be incorrect
-        mMyntManager.connect(mDevice.sn);
+        mMyntManager.connect(mDeviceSn);
     }
 
     private void disconnect() {
         // keepSystemBond false
-        pStrong("disconnect " + mDevice.sn);
-        mMyntManager.disconnect(mDevice.sn, false);
+        pStrong("disconnect " + mDeviceSn);
+        mMyntManager.disconnect(mDeviceSn, false);
     }
 
     @Override

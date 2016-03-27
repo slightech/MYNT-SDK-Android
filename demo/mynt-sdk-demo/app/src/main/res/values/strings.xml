@@ -10,6 +10,11 @@
     <string name="connect">Connect</string>
     <string name="disconnect">Disconnect</string>
 
+    <string name="toggle_alarm">Toggle alarm</string>
+    <string name="request_rssi">Request rssi</string>
+    <string name="request_battery">Request battery</string>
+    <string name="request_info">Request info</string>
+
     <string name="addr">Addr</string>
     <string name="rssi">Rssi</string>
 
