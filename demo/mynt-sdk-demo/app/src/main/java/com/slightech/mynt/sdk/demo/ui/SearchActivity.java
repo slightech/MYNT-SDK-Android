@@ -114,6 +114,18 @@ public class SearchActivity extends BaseActivity implements FoundCallback {
     }
 
     @Override
+    public void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        startSearch();
+    }
+
+    @Override
+    public void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        stopSearch(false);
+    }
+
+    @Override
     public void foundFailed(int errorCode) {
         LogUtils.i(TAG, "foundFailed: %d", errorCode);
         stopSearch(false);
