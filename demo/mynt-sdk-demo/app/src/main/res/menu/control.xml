@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/start"
+          android:checkable="false"
+          android:title="@string/start"
+          app:showAsAction="ifRoom" />
+    <item android:id="@+id/stop"
+          android:checkable="false"
+          android:title="@string/stop"
+          app:showAsAction="ifRoom" />
+</menu>

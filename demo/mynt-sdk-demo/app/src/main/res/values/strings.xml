@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">MYNT Demo</string>
+
+    <string name="title_search">Search MYNTs</string>
+    <string name="title_control">Control MYNTs</string>
+
+    <string name="start">Start</string>
+    <string name="stop">Stop</string>
+
+    <string name="addr">Addr</string>
+    <string name="rssi">Rssi</string>
+
+    <string name="error_ble_not_supported">BLE not supported</string>
+    <string name="error_bluetooth_not_supported">Bluetooth not supported</string>
+    <string name="error_scan_failed">Scan failed</string>
+    <string name="error_address_invalid">Address invalid</string>
+    <string name="error_connect_failed">Connect failed</string>
+    <string name="error_discover_failed">Discover failed</string>
+    <string name="error_disconnect_failed">Disconnect failed</string>
+
+    <string name="tip_wake">Click the button on MYNT device could wake it from sleep!</string>
+
+</resources>
