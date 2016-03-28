@@ -94,6 +94,8 @@ public class ControlActivity extends BaseActivity implements PairCallback, Event
         mMyntManager.setEventCallback(this);
 
         mDeviceSn = device.sn;
+
+        setTitle(mDeviceSn);
     }
 
     @Override
@@ -120,15 +122,19 @@ public class ControlActivity extends BaseActivity implements PairCallback, Event
                 break;
             case R.id.toggle_alarm:
                 mAlarmOn = !mAlarmOn;
+                pStrong(getString(R.string.toggle_alarm) + " " + mAlarmOn);
                 mMyntManager.alarmLong(mDeviceSn, mAlarmOn);
                 break;
             case R.id.request_rssi:
+                pStrong(getString(R.string.request_rssi));
                 mMyntManager.requestRssi(mDeviceSn);
                 break;
             case R.id.request_battery:
+                pStrong(getString(R.string.request_battery));
                 mMyntManager.requestBattery(mDeviceSn);
                 break;
             case R.id.request_info:
+                pStrong(getString(R.string.request_info));
                 mMyntManager.requestInfo(mDeviceSn);
                 break;
         }
@@ -136,14 +142,15 @@ public class ControlActivity extends BaseActivity implements PairCallback, Event
     }
 
     private void connect() {
-        pStrong("connect " + mDeviceSn);
+        pStrong("connect");
         // should not use the input device directly whose state will be incorrect
-        mMyntManager.connect(mDeviceSn);
+        boolean ok = mMyntManager.connect(mDeviceSn);
+        if (!ok) pWarn("connect failed");
     }
 
     private void disconnect() {
         // keepSystemBond false
-        pStrong("disconnect " + mDeviceSn);
+        pStrong("disconnect");
         mMyntManager.disconnect(mDeviceSn, false);
     }
 
