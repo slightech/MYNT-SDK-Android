@@ -14,6 +14,17 @@
     <string name="request_rssi">Request rssi</string>
     <string name="request_battery">Request battery</string>
     <string name="request_info">Request info</string>
+    <string name="send_control_mode">Send control mode</string>
+
+    <string name="clear_history">Clear history</string>
+
+    <string-array name="control_modes">
+        <item>Music</item>
+        <item>Camera</item>
+        <item>PPT</item>
+        <item>Custom</item>
+        <item>Default</item>
+    </string-array>
 
     <string name="addr">Addr</string>
     <string name="rssi">Rssi</string>

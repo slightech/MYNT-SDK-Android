@@ -2,10 +2,12 @@ package com.slightech.mynt.sdk.demo.ui;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.ColorInt;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -21,6 +23,7 @@ import com.slightech.mynt.api.callback.EventCallback;
 import com.slightech.mynt.api.callback.PairCallback;
 import com.slightech.mynt.api.event.ActionEvent;
 import com.slightech.mynt.api.event.ClickEvent;
+import com.slightech.mynt.api.mode.ControlMode;
 import com.slightech.mynt.api.model.Device;
 import com.slightech.mynt.sdk.demo.MyApplication;
 import com.slightech.mynt.sdk.demo.R;
@@ -108,6 +111,7 @@ public class ControlActivity extends BaseActivity implements PairCallback, Event
         menu.findItem(R.id.request_rssi).setVisible(connected);
         menu.findItem(R.id.request_battery).setVisible(connected);
         menu.findItem(R.id.request_info).setVisible(connected);
+        menu.findItem(R.id.send_control_mode).setVisible(connected);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -136,6 +140,22 @@ public class ControlActivity extends BaseActivity implements PairCallback, Event
             case R.id.request_info:
                 pStrong(getString(R.string.request_info));
                 mMyntManager.requestInfo(mDeviceSn);
+                break;
+            case R.id.send_control_mode:
+                new AlertDialog.Builder(this)
+                        .setTitle(R.string.send_control_mode)
+                        .setItems(R.array.control_modes, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                ControlMode mode = ControlMode.get(which - 1);
+                                pStrong(getString(R.string.send_control_mode) + " " + mode.name());
+                                mMyntManager.sendControlMode(mDeviceSn, mode);
+                            }
+                        })
+                        .show();
+                break;
+            case R.id.clear_history:
+                mViewAdapter.clear();
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -208,7 +228,11 @@ public class ControlActivity extends BaseActivity implements PairCallback, Event
 
     @Override
     public void pairBindOver(Device device) {
-        pInfo("pairBindOver");
+        pInfo("pairBindOver:\n"
+                + "  connectMode: %s\n"
+                + "  controlMode: %s",
+                device.connectMode.name(),
+                device.controlMode.name());
     }
 
     @Override
@@ -329,6 +353,11 @@ public class ControlActivity extends BaseActivity implements PairCallback, Event
 
         public void pushInfo(@ColorInt int color, String text) {
             mInfos.push(new Info(color, text));
+            notifyDataSetChanged();
+        }
+
+        public void clear() {
+            mInfos.clear();
             notifyDataSetChanged();
         }
 
