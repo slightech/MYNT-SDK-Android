@@ -94,13 +94,9 @@ public class SearchActivity extends BaseActivity implements FoundCallback {
 
     private void startSearch() {
         LogUtils.i(TAG, "startSearch");
-        if (BluetoothUtils.isEnabled()) {
-            mMyntManager.startSearch();
-            mSearching = true;
-            invalidateOptionsMenu();
-        } else {
-            BluetoothUtils.requestEnable(this);
-        }
+        mMyntManager.startSearch();
+        mSearching = true;
+        invalidateOptionsMenu();
     }
 
     private void stopSearch(boolean fromUser) {
@@ -137,7 +133,7 @@ public class SearchActivity extends BaseActivity implements FoundCallback {
                 ToastUtils.show(this, R.string.error_bluetooth_not_supported);
                 break;
             case LeState.ERROR_BLUETOOTH_OFF:
-                // ignore
+                BluetoothUtils.requestEnable(this);
                 break;
             case LeState.ERROR_SCAN_FAILED:
                 ToastUtils.show(this, R.string.error_scan_failed);
