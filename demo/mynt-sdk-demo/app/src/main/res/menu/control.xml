@@ -30,16 +30,21 @@
           android:title="@string/request_info"
           android:orderInCategory="103"
           app:showAsAction="never|withText" />
+    <item android:id="@+id/request_control_custom_action"
+          android:checkable="false"
+          android:title="@string/request_control_custom_action"
+          android:orderInCategory="104"
+          app:showAsAction="never|withText" />
 
     <item android:id="@+id/send_control_mode"
           android:checkable="false"
           android:title="@string/send_control_mode"
-          android:orderInCategory="104"
+          android:orderInCategory="200"
           app:showAsAction="never|withText" />
 
     <item android:id="@+id/clear_history"
           android:checkable="false"
           android:title="@string/clear_history"
-          android:orderInCategory="200"
+          android:orderInCategory="300"
           app:showAsAction="never|withText" />
 </menu>

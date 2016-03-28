@@ -56,7 +56,7 @@ public class ControlActivity extends BaseActivity implements PairCallback, Event
     private String mDeviceSn;
 
     public enum State {
-        Disconnected, Connecting, Connected,
+        Disconnected, Connecting, Connected, Binding, Bound,
     }
 
     private State mState = State.Disconnected;
@@ -104,14 +104,20 @@ public class ControlActivity extends BaseActivity implements PairCallback, Event
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.control, menu);
+
         menu.findItem(R.id.connect).setVisible(mState == State.Disconnected);
+
         boolean connected = (mState == State.Connected);
-        menu.findItem(R.id.disconnect).setVisible(connected);
-        menu.findItem(R.id.toggle_alarm).setVisible(connected);
-        menu.findItem(R.id.request_rssi).setVisible(connected);
-        menu.findItem(R.id.request_battery).setVisible(connected);
-        menu.findItem(R.id.request_info).setVisible(connected);
-        menu.findItem(R.id.send_control_mode).setVisible(connected);
+        boolean bound = (mState == State.Bound);
+
+        menu.findItem(R.id.disconnect).setVisible(connected || bound);
+
+        menu.findItem(R.id.toggle_alarm).setVisible(bound);
+        menu.findItem(R.id.request_rssi).setVisible(bound);
+        menu.findItem(R.id.request_battery).setVisible(bound);
+        menu.findItem(R.id.request_info).setVisible(bound);
+        menu.findItem(R.id.request_control_custom_action).setVisible(bound);
+        menu.findItem(R.id.send_control_mode).setVisible(bound);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -141,13 +147,17 @@ public class ControlActivity extends BaseActivity implements PairCallback, Event
                 pStrong(getString(R.string.request_info));
                 mMyntManager.requestInfo(mDeviceSn);
                 break;
+            case R.id.request_control_custom_action:
+                pStrong(getString(R.string.request_control_custom_action));
+                mMyntManager.requestControlCustomAction(mDeviceSn);
+                break;
             case R.id.send_control_mode:
                 new AlertDialog.Builder(this)
                         .setTitle(R.string.send_control_mode)
                         .setItems(R.array.control_modes, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                ControlMode mode = ControlMode.get(which - 1);
+                                ControlMode mode = ControlMode.get(which + 1);
                                 pStrong(getString(R.string.send_control_mode) + " " + mode.name());
                                 mMyntManager.sendControlMode(mDeviceSn, mode);
                             }
@@ -192,11 +202,15 @@ public class ControlActivity extends BaseActivity implements PairCallback, Event
         overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
     }
 
+    private void updateState(State state) {
+        mState = state;
+        invalidateOptionsMenu();
+    }
+
     @Override
     public void pairConnectStart(Device device) {
         pInfo("pairConnectStart");
-        mState = State.Connecting;
-        invalidateOptionsMenu();
+        updateState(State.Connecting);
     }
 
     @Override
@@ -204,8 +218,7 @@ public class ControlActivity extends BaseActivity implements PairCallback, Event
         if (errorCode == 0) {
             // success
             pInfo("pairConnectOver: %d, %d", errorCode, status);
-            mState = State.Connected;
-            invalidateOptionsMenu();
+            updateState(State.Connected);
         } else {
             // failed, then will disconnect
             pError("pairConnectOver: %d, %d", errorCode, status);
@@ -216,6 +229,7 @@ public class ControlActivity extends BaseActivity implements PairCallback, Event
     public void pairServicesDiscovered(Device device, boolean success) {
         if (success) {
             pInfo("pairServicesDiscovered: true");
+            updateState(State.Binding);
         } else {
             pError("pairServicesDiscovered: false");
         }
@@ -233,13 +247,13 @@ public class ControlActivity extends BaseActivity implements PairCallback, Event
                 + "  controlMode: %s",
                 device.connectMode.name(),
                 device.controlMode.name());
+        updateState(State.Bound);
     }
 
     @Override
     public void pairDisconnect(Device device, boolean fromUser) {
         pInfo("pairDisconnect: %s", fromUser);
-        mState = State.Disconnected;
-        invalidateOptionsMenu();
+        updateState(State.Disconnected);
     }
 
     @Override
