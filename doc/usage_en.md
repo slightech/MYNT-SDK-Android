@@ -35,7 +35,7 @@ Using `MyntManager` to start search in your `Application`:
         @Override
         public void onCreate() {
             super.onCreate();
-            // 搜索小觅，即会上报附近发现设备到防丢网络
+            // Searching MYNTs here could help people who lost the things.
             new MyntManager(this).startSearch();
         }
 
