@@ -16,11 +16,38 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
 
-## 2) How to control the MYNT device
+## 2) How to control the MYNTs
+
+Instantiate `MyntManager` class then using it to search and control MYNTs.
+
+* Call `startSearch` to search the MYNTs, and get the result from the `FoundCallback`.
+* Call `connect` to connect the MYNTs, then control them with `MyntManager`.
+    - Set `PairCallback` to listen the connect process.
+    - Set `EventCallback` to listen the device events.
 
 
 ## 3) How to contribute the anti-lost network
 
+Using `MyntManager` to start search in your `Application`:
 
-## 4) ProGuard
+    public class MyApplication extends Application {
 
+        @Override
+        public void onCreate() {
+            super.onCreate();
+            // 搜索小觅，即会上报附近发现设备到防丢网络
+            new MyntManager(this).startSearch();
+        }
+
+        //...
+    }
+
+Then will upload nearby MYNTs to the anti-lost network when the bluetooth is available.
+
+* Set the `MyntParams` to change the search internal etc.
+* Get the `Nearby` feature to bind location provider or upload by yourself.
+
+
+## 4) About ProGuard rules
+
+    -keep class com.slighetch.** { *; }
