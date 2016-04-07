@@ -2,13 +2,16 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "23.0.2"
+    buildToolsVersion "23.0.3"
 
     defaultConfig {
         applicationId "com.slightech.mynt.sdk.demo"
         minSdkVersion 18
         targetSdkVersion 22
         //targetSdkVersion 23
+        // Only when the bluetooth and location are both on can the devices be scanned.
+        // * http://stackoverflow.com/questions/32708374/bluetooth-le-scanfilters-dont-work-on-android-m
+        // * http://developer.android.com/about/versions/marshmallow/android-6.0-changes.html#behavior-hardware-id
         versionCode 1
         versionName "1.0"
     }
@@ -23,6 +26,6 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:23.1.1'
-    compile 'com.android.support:design:23.1.1'
+    compile 'com.android.support:appcompat-v7:23.2.1'
+    compile 'com.android.support:design:23.2.1'
 }
