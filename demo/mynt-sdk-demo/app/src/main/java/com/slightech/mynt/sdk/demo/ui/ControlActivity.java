@@ -20,6 +20,7 @@ import android.widget.TextView;
 
 import com.slightech.mynt.api.MyntManager;
 import com.slightech.mynt.api.callback.EventCallback;
+import com.slightech.mynt.api.callback.KeyCallback;
 import com.slightech.mynt.api.callback.PairCallback;
 import com.slightech.mynt.api.event.ActionEvent;
 import com.slightech.mynt.api.event.ClickEvent;
@@ -35,7 +36,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
 
-public class ControlActivity extends BaseActivity implements PairCallback, EventCallback {
+public class ControlActivity extends BaseActivity implements PairCallback, EventCallback, KeyCallback {
 
     static final String TAG = "SearchActivity";
 
@@ -95,6 +96,8 @@ public class ControlActivity extends BaseActivity implements PairCallback, Event
         mMyntManager = MyApplication.getMyntManager();
         mMyntManager.setPairCallback(this);
         mMyntManager.setEventCallback(this);
+        // If support the lower version firmware with key pairing
+        mMyntManager.setKeyCallback(this);
 
         mDeviceSn = device.sn;
 
@@ -310,6 +313,17 @@ public class ControlActivity extends BaseActivity implements PairCallback, Event
     @Override
     public void eventAlarmChanged(Device device, boolean on) {
         pInfo("eventAlarmChanged: %s", on);
+    }
+
+    @Override
+    public String keyStored(Device device) {
+        pStrong("please click the MYNT button to pair");
+        return null;
+    }
+
+    @Override
+    public void keyPaired(Device device, String password) {
+        pInfo("keyPaired: %s", password);
     }
 
     private void pInfo(String msg, Object... args) {
