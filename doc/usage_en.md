@@ -3,7 +3,7 @@
 
 ## 1) Requirements
 
-**Permissions should be declared in the manifest:**
+**Permissions should be declared in `AndroidManifest.xml`:**
 
     <!-- Require to using BLE (Bluetooth low energy) -->
     <uses-permission android:name="android.permission.BLUETOOTH" />
@@ -14,6 +14,20 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+**`build.gradle` if target Android 6.0 (API level 23) or higher：**
+
+    android {
+        <!-- Require Apache HTTP client APIs -->
+        useLibrary 'org.apache.http.legacy'
+
+        <!-- If target API 23 or higher, only when the bluetooth and location are both on can the devices be scanned. However, lower the API 23, only bluetooth is required on. -->
+        defaultConfig {
+            targetSdkVersion 22
+        }
+    }
+
+Reference: [Android 6.0 Changes](http://developer.android.com/about/versions/marshmallow/android-6.0-changes.html)
 
 
 ## 2) How to control the MYNTs

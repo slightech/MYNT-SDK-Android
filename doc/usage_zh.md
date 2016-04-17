@@ -4,7 +4,7 @@
 
 ## 1) 要求
 
-**需要声明的权限：**
+**`AndroidManifest.xml`需要声明的权限：**
 
     <!-- Require to using BLE (Bluetooth low energy) -->
     <uses-permission android:name="android.permission.BLUETOOTH" />
@@ -15,6 +15,20 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+**`build.gradle`于 Android 6.0 (API level 23) 上：**
+
+    android {
+        <!-- 需要 Apache HTTP client APIs -->
+        useLibrary 'org.apache.http.legacy'
+
+        <!-- 如果在 API 23 及以上，仅当蓝牙和位置都开启时，设备才能被扫描到。而之前，只需要蓝牙就可以。 -->
+        defaultConfig {
+            targetSdkVersion 22
+        }
+    }
+
+参考: [Android 6.0 Changes](http://developer.android.com/about/versions/marshmallow/android-6.0-changes.html)
 
 
 ## 2) 如何控制小觅设备
