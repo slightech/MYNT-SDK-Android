@@ -1,5 +1,5 @@
 
-![](https://static.slightech.com/img/slide_mynt.png)
+![](https://raw.githubusercontent.com/slightech/MYNT-SDK-Android/master/static/slide_mynt.png)
 
 [MYNT]: https://mynt.slightech.com/
 
@@ -16,13 +16,13 @@ MYNT SDK 用于帮助开发者更快得实现小觅的搜索和控制。
 
 小觅是一款超酷的智能防丢器，采用不锈钢PVD工艺，镜面或磨砂，银黑金蓝四色可选，独有外观专利。
 
-![](https://static.slightech.com/img/mynt/colorful.png)
+![](https://raw.githubusercontent.com/slightech/MYNT-SDK-Android/master/static/colorful.png)
 
 小觅防丢，人狗不丢：双向寻物、社区找回、携手公益。
 
 小觅不只是防丢器，更是生活好伴侣：放手自拍、随心切歌、遥控PPT。
 
-![](https://static.slightech.com/img/mynt/slide-ctr-photo.png)
+![](https://raw.githubusercontent.com/slightech/MYNT-SDK-Android/master/static/slide-ctr-photo.png)
 
 官网：http://mynt.slightech.com/cn 
 购买：https://xiaomishuma.tmall.com/

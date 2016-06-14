@@ -1,5 +1,5 @@
 
-![](https://static.slightech.com/img/slide_mynt.png)
+![](https://raw.githubusercontent.com/slightech/MYNT-SDK-Android/master/static/slide_mynt.png)
 
 [MYNT]: https://mynt.slightech.com/
 
@@ -16,7 +16,7 @@ MYNT is a thinnest smart tracker, only 1/8 inch. Easy to fit in a wallet, attach
 
 MYNT is a most exquisite smart tracker, processed with PVD technology on stainless steel with frosting or polishing. Four colors are optional: Silver, Black, Gold, and Blue.
 
-![](https://static.slightech.com/img/mynt/colorful.png)
+![](https://raw.githubusercontent.com/slightech/MYNT-SDK-Android/master/static/colorful.png)
 
 MYNT is not just a smart tracker, can also become your everyday smart companion. In addition to anti-loss and finder capability, MYNT can also act the following really cool utilities:
 
@@ -24,7 +24,7 @@ MYNT is not just a smart tracker, can also become your everyday smart companion.
 * Music remoter: Control freely, enjoy your music.
 * Slide remoter: Control freely, facilitate efficiency.
 
-![](https://static.slightech.com/img/mynt/slide-ctr-photo.png)
+![](https://raw.githubusercontent.com/slightech/MYNT-SDK-Android/master/static/slide-ctr-photo.png)
 
 MYNT - No lost, all found, control everything.
 
