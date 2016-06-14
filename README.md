@@ -39,6 +39,10 @@ MYNT - No lost, all found, control everything.
     - [usage_en](https://github.com/slightech/MYNT-SDK-Android/blob/master/doc/usage_en.md), [usage_zh](https://github.com/slightech/MYNT-SDK-Android/blob/master/doc/usage_zh.md)
 * demo: the demo shows how to control the MYNTs with the libraries.
 
+## More Languages
+
+* [中文说明](https://github.com/slightech/MYNT-SDK-Android/blob/master/README_CN.md)
+
 ## Copyright
 
     Copyright 2016 Slightech Co., Ltd. All rights reserved.
