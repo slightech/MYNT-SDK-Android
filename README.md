@@ -28,8 +28,8 @@ MYNT is not just a smart tracker, can also become your everyday smart companion.
 
 MYNT - No lost, all found, control everything.
 
-Website: https://mynt.slightech.com
-Purchase: https://www.amazon.com/dp/B017QML97W
+- Website: https://mynt.slightech.com
+- Purchase: https://www.amazon.com/dp/B017QML97W
 
 ## SDK Directory Structure
 

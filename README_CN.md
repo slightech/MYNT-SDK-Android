@@ -24,8 +24,8 @@ MYNT SDK 用于帮助开发者更快得实现小觅的搜索和控制。
 
 ![](https://raw.githubusercontent.com/slightech/MYNT-SDK-Android/master/static/slide-ctr-photo.png)
 
-官网：http://mynt.slightech.com/cn 
-购买：https://xiaomishuma.tmall.com/
+- 官网：http://mynt.slightech.com/cn 
+- 购买：https://xiaomishuma.tmall.com/
 
 ## SDK 目录结构
 
