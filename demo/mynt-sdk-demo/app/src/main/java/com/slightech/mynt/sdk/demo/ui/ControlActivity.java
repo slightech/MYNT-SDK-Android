@@ -136,6 +136,7 @@ public class ControlActivity extends BaseActivity implements PairCallback, Event
         menu.findItem(R.id.request_info).setVisible(bound);
         menu.findItem(R.id.request_control_custom_action).setVisible(bound);
         menu.findItem(R.id.send_control_mode).setVisible(bound);
+        menu.findItem(R.id.send_control_custom_clicks).setVisible(bound);
         return super.onCreateOptionsMenu(menu);
     }
 
