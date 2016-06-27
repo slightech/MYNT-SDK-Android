@@ -16,6 +16,7 @@
     <string name="request_info">Request info</string>
     <string name="request_control_custom_action">Request control custom action</string>
     <string name="send_control_mode">Send control mode</string>
+    <string name="send_control_custom_clicks">Send control custom clicks</string>
 
     <string name="clear_history">Clear history</string>
 

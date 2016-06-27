@@ -52,6 +52,7 @@ public class ControlActivity extends BaseActivity implements PairCallback, Event
 
     private RecyclerView mRecyclerView;
     private ViewAdapter mViewAdapter;
+    private TextView mTextView;
 
     private MyntManager mMyntManager;
     private String mDeviceSn;
@@ -86,6 +87,20 @@ public class ControlActivity extends BaseActivity implements PairCallback, Event
 
         mViewAdapter = new ViewAdapter();
         mRecyclerView.setAdapter(mViewAdapter);
+
+        mTextView = KitUtils.findById(this, R.id.text);
+    }
+
+    private void updateInfo(Device device) {
+        mTextView.setText(String.format("%s\n%s",
+                device.connectMode.name(), device.controlMode.name()));
+    }
+
+    private void updateInfo(String sn, ControlMode mode) {
+        // update control mode directly
+        final Device device = mMyntManager.findDevice(sn);
+        device.controlMode = mode;
+        updateInfo(device);
     }
 
     private void intObjects() {
@@ -163,9 +178,15 @@ public class ControlActivity extends BaseActivity implements PairCallback, Event
                                 ControlMode mode = ControlMode.get(which + 1);
                                 pStrong(getString(R.string.send_control_mode) + " " + mode.name());
                                 mMyntManager.sendControlMode(mDeviceSn, mode);
+                                updateInfo(mDeviceSn, mode);
                             }
                         })
                         .show();
+                break;
+            case R.id.send_control_custom_clicks:
+                pStrong(getString(R.string.send_control_custom_clicks));
+                mMyntManager.sendControlCustomClicks(mDeviceSn);
+                updateInfo(mDeviceSn, ControlMode.CONTROL_MODE_CUSTOM);
                 break;
             case R.id.clear_history:
                 mViewAdapter.clear();
@@ -251,6 +272,7 @@ public class ControlActivity extends BaseActivity implements PairCallback, Event
                 device.connectMode.name(),
                 device.controlMode.name());
         updateState(State.Bound);
+        updateInfo(device);
     }
 
     @Override
