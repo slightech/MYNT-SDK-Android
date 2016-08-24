@@ -41,7 +41,7 @@ MYNT - No lost, all found, control everything.
 
 ## Other Introductions
 
-* [How to update firmware](https://github.com/slightech/MYNT-SDK-Android/raw/master/doc/how_to_update_firmware_en.md)
+* [How to update firmware](https://github.com/slightech/MYNT-SDK-Android/blob/master/doc/how/how_to_update_firmware_en.md)
 
 ## More Languages
 
