@@ -31,7 +31,7 @@ MYNT SDK 用于帮助开发者更快得实现小觅的搜索和控制。
 
 * libs: MYNT SDK 库。
 * doc: MYNT API 和使用文档。
-    - [download API doc](https://github.com/slightech/MYNT-SDK-Android/raw/master/doc/mynt-sdk-doc-1.1.zip)
+    - [download API doc](https://github.com/slightech/MYNT-SDK-Android/raw/master/doc/mynt-sdk-doc-1.1.2.zip)
     - [usage_en](https://github.com/slightech/MYNT-SDK-Android/blob/master/doc/usage_en.md), [usage_zh](https://github.com/slightech/MYNT-SDK-Android/blob/master/doc/usage_zh.md)
 * demo: 使用 SDK 库控制小觅的样例。
 

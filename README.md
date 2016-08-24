@@ -35,7 +35,7 @@ MYNT - No lost, all found, control everything.
 
 * libs: the MYNT SDK libraries.
 * doc: the MYNT SDK API and usage documnets.
-    - [download API doc](https://github.com/slightech/MYNT-SDK-Android/raw/master/doc/mynt-sdk-doc-1.1.zip)
+    - [download API doc](https://github.com/slightech/MYNT-SDK-Android/raw/master/doc/mynt-sdk-doc-1.1.2.zip)
     - [usage_en](https://github.com/slightech/MYNT-SDK-Android/blob/master/doc/usage_en.md), [usage_zh](https://github.com/slightech/MYNT-SDK-Android/blob/master/doc/usage_zh.md)
 * demo: the demo shows how to control the MYNTs with the libraries.
 
