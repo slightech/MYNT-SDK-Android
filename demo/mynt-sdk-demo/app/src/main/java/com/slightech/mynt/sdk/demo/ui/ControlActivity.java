@@ -1,16 +1,20 @@
 package com.slightech.mynt.sdk.demo.ui;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.support.annotation.ColorInt;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -26,17 +30,22 @@ import com.slightech.mynt.api.event.ActionEvent;
 import com.slightech.mynt.api.event.ClickEvent;
 import com.slightech.mynt.api.mode.ControlMode;
 import com.slightech.mynt.api.model.Device;
+import com.slightech.mynt.api.oad.OADProgInfo;
+import com.slightech.mynt.api.oad.OADUpdater;
 import com.slightech.mynt.sdk.demo.MyApplication;
 import com.slightech.mynt.sdk.demo.R;
 import com.slightech.mynt.sdk.demo.ui.base.BaseActivity;
+import com.slightech.mynt.sdk.demo.ui.dialog.UpdateDialogFragment;
 import com.slightech.mynt.sdk.demo.util.KitUtils;
 import com.slightech.mynt.sdk.demo.util.LogUtils;
+import com.slightech.mynt.sdk.demo.util.ToastUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
 
-public class ControlActivity extends BaseActivity implements PairCallback, EventCallback, KeyCallback {
+public class ControlActivity extends BaseActivity implements PairCallback, EventCallback, KeyCallback,
+        UpdateDialogFragment.OnUpdateSelectListener {
 
     static final String TAG = "SearchActivity";
 
@@ -63,7 +72,9 @@ public class ControlActivity extends BaseActivity implements PairCallback, Event
 
     private State mState = State.Disconnected;
     private boolean mAlarmOn = false;
+    private boolean mUpdating = false;
 
+    @SuppressLint("SimpleDateFormat")
     private final SimpleDateFormat mDateFormat = new SimpleDateFormat("HH:mm:ss.SSS");
 
     @Override
@@ -137,6 +148,7 @@ public class ControlActivity extends BaseActivity implements PairCallback, Event
         menu.findItem(R.id.request_control_custom_action).setVisible(bound);
         menu.findItem(R.id.send_control_mode).setVisible(bound);
         menu.findItem(R.id.send_control_custom_clicks).setVisible(bound);
+        menu.findItem(R.id.update_firmware).setVisible(bound);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -189,6 +201,9 @@ public class ControlActivity extends BaseActivity implements PairCallback, Event
                 mMyntManager.sendControlCustomClicks(mDeviceSn);
                 updateInfo(mDeviceSn, ControlMode.CONTROL_MODE_CUSTOM);
                 break;
+            case R.id.update_firmware:
+                updateFirmware();
+                break;
             case R.id.clear_history:
                 mViewAdapter.clear();
                 break;
@@ -207,6 +222,88 @@ public class ControlActivity extends BaseActivity implements PairCallback, Event
         // keepSystemBond false
         pStrong("disconnect");
         mMyntManager.disconnect(mDeviceSn, false);
+    }
+
+    private void updateFirmware() {
+        String msg = null;
+        if (mUpdating) {
+            msg = "firmware is updating now";
+            return;
+        }
+        if (!mMyntManager.checkOADService(mDeviceSn)) {
+            msg = "firmware update service is failed";
+        }
+        if (msg != null) {
+            pWarn(msg);
+            ToastUtils.show(this, msg);
+            return;
+        }
+        UpdateDialogFragment.show(this, mDeviceSn).setOnUpdateSelectListener(this);
+    }
+
+    @Override
+    public void onUpdateSelect(String filepath, boolean formAssets) {
+        pStrong("select: " + filepath);
+        mMyntManager.sendOADFile(mDeviceSn, filepath, formAssets, createUpdateCallback());
+    }
+
+    private OADUpdater.Callback createUpdateCallback() {
+        return new OADUpdater.Callback() {
+
+            long mTimeStart;
+            PowerManager.WakeLock mWakeLock;
+
+            @Override
+            public void onError(OADUpdater updater, int errorCode) {
+                String errorMsg = errorCode + ": " + OADUpdater.errorToString(errorCode);
+                pWarn("update error: " + errorMsg);
+                ToastUtils.show(ControlActivity.this, errorMsg);
+                mUpdating = false;
+            }
+
+            @Override
+            public void onPrepare(OADUpdater updater) {
+                pStrong("update: prepare");
+            }
+
+            @Override
+            public void onStart(OADUpdater updater) {
+                pStrong("update: start to send");
+                mTimeStart = System.currentTimeMillis();
+                PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+                mWakeLock = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK, "StayWake");
+                mWakeLock.acquire();
+                mUpdating = true;
+            }
+
+            @Override
+            public void onProgress(OADUpdater updater, float progress) {
+                final OADProgInfo info = updater.getOADProgInfo();
+                Log.i(TAG, String.format(
+                        "progress: %.2f; trans blocks: %d; total blocks: %d",
+                        progress, info.iBlocks(), info.nBlocks()));
+                setTitle(String.format("%.1f%%, %d/%d blocks", progress, info.iBlocks(), info.nBlocks()));
+            }
+
+            @Override
+            public void onStop(OADUpdater updater, boolean success) {
+                final long elapsed = System.currentTimeMillis() - mTimeStart;
+                String result = (success ? "success" : "failed");
+                pStrong("update: " + result + "; elapsed: " + (elapsed / 1000) + "s");
+                if (mWakeLock != null) {
+                    mWakeLock.release();
+                }
+                mWakeLock = null;
+                mUpdating = false;
+                setTitle(mDeviceSn);
+                ToastUtils.show(ControlActivity.this, "Update " + result);
+
+                // disconnect if success for reconnecting it much quickly
+                if (success) {
+                    mMyntManager.disconnect(mDeviceSn);
+                }
+            }
+        };
     }
 
     @Override
@@ -274,6 +371,9 @@ public class ControlActivity extends BaseActivity implements PairCallback, Event
                 device.controlMode.name());
         updateState(State.Bound);
         updateInfo(device);
+        // get the firmware info once bound
+        pStrong(getString(R.string.request_info));
+        mMyntManager.requestInfo(mDeviceSn);
     }
 
     @Override
@@ -356,17 +456,17 @@ public class ControlActivity extends BaseActivity implements PairCallback, Event
 
     private void pStrong(String msg, Object... args) {
         LogUtils.i(TAG, msg, args);
-        pushInfo(getResources().getColor(R.color.blue), msg, args);
+        pushInfo(ContextCompat.getColor(this, R.color.blue), msg, args);
     }
 
     private void pWarn(String msg, Object... args) {
         LogUtils.w(TAG, msg, args);
-        pushInfo(getResources().getColor(R.color.orange), msg, args);
+        pushInfo(ContextCompat.getColor(this, R.color.orange), msg, args);
     }
 
     private void pError(String msg, Object... args) {
         LogUtils.e(TAG, msg, args);
-        pushInfo(getResources().getColor(R.color.red), msg, args);
+        pushInfo(ContextCompat.getColor(this, R.color.red), msg, args);
     }
 
     private void pushInfo(@ColorInt int color, String msg, Object... args) {

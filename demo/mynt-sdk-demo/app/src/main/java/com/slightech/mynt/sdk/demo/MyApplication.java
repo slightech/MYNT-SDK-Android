@@ -18,6 +18,7 @@ public class MyApplication extends Application {
         if (BuildConfig.DEBUG) {
             setupStrictMode();
         }
+        MyntManager.setDebug(BuildConfig.DEBUG);
     }
 
     public static MyApplication getInstance() {
