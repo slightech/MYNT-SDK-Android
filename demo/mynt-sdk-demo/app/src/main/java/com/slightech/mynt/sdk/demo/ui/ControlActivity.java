@@ -28,6 +28,7 @@ import com.slightech.mynt.api.callback.KeyCallback;
 import com.slightech.mynt.api.callback.PairCallback;
 import com.slightech.mynt.api.event.ActionEvent;
 import com.slightech.mynt.api.event.ClickEvent;
+import com.slightech.mynt.api.mode.ConnectMode;
 import com.slightech.mynt.api.mode.ControlMode;
 import com.slightech.mynt.api.model.Device;
 import com.slightech.mynt.api.oad.OADProgInfo;
@@ -110,6 +111,7 @@ public class ControlActivity extends BaseActivity implements PairCallback, Event
     private void updateInfo(String sn, ControlMode mode) {
         // update control mode directly
         final Device device = mMyntManager.findDevice(sn);
+        if (device == null) return;
         device.controlMode = mode;
         updateInfo(device);
     }
@@ -139,6 +141,9 @@ public class ControlActivity extends BaseActivity implements PairCallback, Event
         boolean connected = (mState == State.Connected);
         boolean bound = (mState == State.Bound);
 
+        final Device device = mMyntManager.findDevice(mDeviceSn);
+        boolean hidMode = device != null && device.connectMode == ConnectMode.CONNECT_HID;
+
         menu.findItem(R.id.disconnect).setVisible(connected || bound);
 
         menu.findItem(R.id.toggle_alarm).setVisible(bound);
@@ -149,6 +154,10 @@ public class ControlActivity extends BaseActivity implements PairCallback, Event
         menu.findItem(R.id.send_control_mode).setVisible(bound);
         menu.findItem(R.id.send_control_custom_clicks).setVisible(bound);
         menu.findItem(R.id.update_firmware).setVisible(bound);
+
+        // `MyntManager#sendControl*` methods are only valid in `ConnectMode#CONNECT_HID` mode.
+        menu.findItem(R.id.send_control_mode).setEnabled(hidMode);
+        menu.findItem(R.id.send_control_custom_clicks).setEnabled(hidMode);
         return super.onCreateOptionsMenu(menu);
     }
 
