@@ -18,6 +18,8 @@
     <string name="send_control_mode">Send control mode</string>
     <string name="send_control_custom_clicks">Send control custom clicks</string>
     <string name="update_firmware">Update Firmware</string>
+    <string name="setup_ble_mode">Setup BLE mode</string>
+    <string name="setup_hid_mode">Setup HID mode</string>
 
     <string name="clear_history">Clear history</string>
 

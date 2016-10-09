@@ -142,6 +142,7 @@ public class ControlActivity extends BaseActivity implements PairCallback, Event
         boolean bound = (mState == State.Bound);
 
         final Device device = mMyntManager.findDevice(mDeviceSn);
+        boolean bleMode = device != null && device.connectMode == ConnectMode.CONNECT_BLE;
         boolean hidMode = device != null && device.connectMode == ConnectMode.CONNECT_HID;
 
         menu.findItem(R.id.disconnect).setVisible(connected || bound);
@@ -154,6 +155,11 @@ public class ControlActivity extends BaseActivity implements PairCallback, Event
         menu.findItem(R.id.send_control_mode).setVisible(bound);
         menu.findItem(R.id.send_control_custom_clicks).setVisible(bound);
         menu.findItem(R.id.update_firmware).setVisible(bound);
+
+        // It's not recommended to using BLE connect mode.
+        menu.findItem(R.id.setup_ble_mode).setVisible(false);
+        //menu.findItem(R.id.setup_ble_mode).setVisible(bound && hidMode);
+        menu.findItem(R.id.setup_hid_mode).setVisible(bound && bleMode);
 
         // `MyntManager#sendControl*` methods are only valid in `ConnectMode#CONNECT_HID` mode.
         menu.findItem(R.id.send_control_mode).setEnabled(hidMode);
@@ -212,6 +218,14 @@ public class ControlActivity extends BaseActivity implements PairCallback, Event
                 break;
             case R.id.update_firmware:
                 updateFirmware();
+                break;
+            case R.id.setup_ble_mode:
+                pStrong(getString(R.string.setup_ble_mode));
+                mMyntManager.setupConnectBLE(mDeviceSn);
+                break;
+            case R.id.setup_hid_mode:
+                pStrong(getString(R.string.setup_hid_mode));
+                mMyntManager.setupConnectHID(mDeviceSn);
                 break;
             case R.id.clear_history:
                 mViewAdapter.clear();
