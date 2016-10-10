@@ -122,9 +122,11 @@ public class ControlActivity extends BaseActivity implements PairCallback, Event
         LogUtils.i(TAG, "device: %s", device.sn);
 
         mMyntManager = MyApplication.getMyntManager();
-        mMyntManager.setPairCallback(this);
-        mMyntManager.setEventCallback(this);
-        // If support the lower version firmware with key pairing
+        // don't forget to remove callbacks in `onDestroy`
+        mMyntManager.addPairCallback(this);
+        mMyntManager.addEventCallback(this);
+
+        // If support the lower version firmware with key pairing, unnecessary now
         mMyntManager.setKeyCallback(this);
 
         mDeviceSn = device.sn;
@@ -339,6 +341,13 @@ public class ControlActivity extends BaseActivity implements PairCallback, Event
     public void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         disconnect();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mMyntManager.removePairCallback(this);
+        mMyntManager.removeEventCallback(this);
     }
 
     @Override

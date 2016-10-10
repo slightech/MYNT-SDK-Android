@@ -72,7 +72,8 @@ public class SearchActivity extends BaseActivity implements FoundCallback {
 
     private void initObjects() {
         mMyntManager = MyApplication.getMyntManager();
-        mMyntManager.setFoundCallback(this);
+        // don't forget to remove callbacks in `onDestroy`
+        mMyntManager.addFoundCallback(this);
     }
 
     @Override
@@ -119,6 +120,12 @@ public class SearchActivity extends BaseActivity implements FoundCallback {
     public void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         stopSearch(false);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mMyntManager.removeFoundCallback(this);
     }
 
     @Override
